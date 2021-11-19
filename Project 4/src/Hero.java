@@ -5,12 +5,24 @@ public class Hero {
 
     public int maxDamage;
 
-    // Added spawn location
+    public int originalPosition;
+    public int newPositionX;
+    public int newPositionY;
+
     public Hero(String name, int health, int maxDamage) {
         this.name = name;
         this.health = health;
         this.maxDamage = maxDamage;
     }
+
+    // public String monsterSmell(int[][] map, int monster) {
+    // monster = 1;
+    // int adjascentSquares = map [0][0];
+    // if(adjascentSquares.equals(monster)){
+
+    // }
+    // return "";
+    // }
 
     public void hit(Monster other) {
 
@@ -44,7 +56,7 @@ public class Hero {
         return true;
     }
 
-    public void moveRoom(Hero other) {
+    public void moveRoomLoseHealth() {
         health -= 2;
     }
 }
