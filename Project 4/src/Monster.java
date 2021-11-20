@@ -5,10 +5,32 @@ public class Monster {
 
     public int maxDamage;
 
-    public Monster(String name, int health, int maxDamage) {
+    private int columnPosition;
+
+    private int rowPosition;
+
+    public Monster(String name, int health, int maxDamage, int columnPosition, int rowPosition) {
         this.name = name;
         this.health = health;
         this.maxDamage = maxDamage;
+        this.columnPosition = columnPosition;
+        this.rowPosition = rowPosition;
+    }
+
+    public void setCol(int newCol) {
+        columnPosition = newCol;
+    }
+
+    public int getCol() {
+        return columnPosition;
+    }
+
+    public void setRow(int newRow) {
+        rowPosition = newRow;
+    }
+
+    public int getRow() {
+        return rowPosition;
     }
 
     public void hit(Hero other) {
@@ -24,6 +46,13 @@ public class Monster {
 
         String nameWithHealth = name + " (" + health + ")";
         return nameWithHealth;
+    }
+
+    public void dead() {
+        columnPosition = 0;
+        rowPosition = 0;
+        health = 0;
+        maxDamage = 0;
     }
 
     int monsterInRoom(Monster monster, int other) {

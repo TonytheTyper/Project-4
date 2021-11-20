@@ -5,24 +5,45 @@ public class Hero {
 
     public int maxDamage;
 
-    public int originalPosition;
-    public int newPositionX;
-    public int newPositionY;
+    private int columnPosition;
 
-    public Hero(String name, int health, int maxDamage) {
+    private int rowPosition;
+
+    public Hero(String name, int health, int maxDamage, int columnPosition, int rowPosition) {
         this.name = name;
         this.health = health;
         this.maxDamage = maxDamage;
+        this.columnPosition = columnPosition;
+        this.rowPosition = rowPosition;
     }
 
-    // public String monsterSmell(int[][] map, int monster) {
-    // monster = 1;
-    // int adjascentSquares = map [0][0];
-    // if(adjascentSquares.equals(monster)){
+    public void setCol(int newCol) {
+        columnPosition = newCol;
+    }
 
-    // }
-    // return "";
-    // }
+    public int getCol() {
+        return columnPosition;
+    }
+
+    public void setRow(int newRow) {
+        rowPosition = newRow;
+    }
+
+    public int getRow() {
+        return rowPosition;
+    }
+
+    public boolean monsterSmell(Monster other) {
+        boolean monsterNearby = false;
+        if ((other.getCol() == columnPosition + 1 || other.getCol() == columnPosition - 1)
+                && other.getRow() == rowPosition) {
+            monsterNearby = true;
+        } else if ((other.getRow() == rowPosition + 1 || other.getRow() == rowPosition - 1)
+                && other.getCol() == columnPosition) {
+            monsterNearby = true;
+        }
+        return monsterNearby;
+    }
 
     public void hit(Monster other) {
 

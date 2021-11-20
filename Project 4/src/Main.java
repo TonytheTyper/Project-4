@@ -1,14 +1,17 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 // Anthony Genovesi
 // Section 7
 // Project 4: Dungeon Escape 
 
 public class Main {
+    static ArrayList<Monster> allMyMonsters = new ArrayList<Monster>();
+    private static Scanner sc = new Scanner(System.in);
+
     static int userInputDungeonSize() {
         Boolean dungeonSizeError = true;
         int dungeonSize = 0;
         while (dungeonSizeError == true) {
-            Scanner sc = new Scanner(System.in);
             System.out.println("Between 5-10 inclusive...");
             System.out.print("What size dungeon would you like to explore? ");
             dungeonSize = sc.nextInt();
@@ -19,12 +22,12 @@ public class Main {
                 System.out.println("Dungeon size is: " + dungeonSize + " X " + dungeonSize);
             }
         }
+        sc.nextLine();
         return dungeonSize;
     }
 
     static String userInputName() {
         String userName = "";
-        Scanner sc = new Scanner(System.in);
         System.out.print("What is your hero's name? ");
         userName = sc.nextLine();
 
@@ -44,7 +47,7 @@ public class Main {
         return userName;
     }
 
-    public static int[][] spawnMonsters(int[][] map) {
+    public static void spawnMonsters(int[][] map) {
         int multipleMonsters = 1;
         for (int i = 6; i <= map[0].length * map[0].length; i += 6) {
             int amountOfMonsters = 1;
@@ -57,25 +60,24 @@ public class Main {
             randomChoiceX = Math.floor(randomChoiceY);
             int randomChoiceIntY = (int) randomChoiceY;
 
-            // Creating my monsters
-            Monster monster = new Monster("Monster " + i / 6, 25, 5);
-
-            // If more than one monster is in the room
-            // Not a perfect catch
-            if (map[randomChoiceIntX][randomChoiceIntY] >= amountOfMonsters) {
-                multipleMonsters += 1;
-                amountOfMonsters = multipleMonsters;
-            }
-
             // If monster would spawn with hero go back an iteration
             if (randomChoiceIntX == 0 && randomChoiceIntY == 0) {
                 i -= 6;
             } else {
+                // Creating my monsters
+                Monster monster = new Monster("Monster " + i / 6, 25, 5, randomChoiceIntY, randomChoiceIntX);
+                allMyMonsters.add(monster);
+                // System.out.println(allMyMonsters); checking my hashmap
+                // If more than one monster is in the room
+                // Not a perfect catch
+                if (map[randomChoiceIntX][randomChoiceIntY] >= amountOfMonsters) {
+                    multipleMonsters += 1;
+                    amountOfMonsters = multipleMonsters;
+                }
                 map[randomChoiceIntX][randomChoiceIntY] = monster.monsterInRoom(monster, amountOfMonsters);
             }
-            System.out.println("Monster " + monster + " spawned!");
+            // System.out.println("Monster " + monster + " spawned!");
         }
-        return map;
     }
 
     public static void combat(Hero hero, Monster monster) throws Exception {
@@ -83,50 +85,40 @@ public class Main {
             System.out.print(hero.toString() + " ");
             System.out.println(monster.toString());
 
-            // They were hitting the wrong guys.... Changed the inputs to include a
-            // different
-            // object and made the health public instead of private so each object could get
-            // the other objects health
-
             hero.hit(monster);
             monster.hit(hero);
             Thread.sleep(1000); // Slowing down the loop to see the action!
         }
     }
 
-    static void playerMovement(int[][] map, int playerLocation, int dungeonSize) {
-        Scanner sc = new Scanner(System.in);
-        boolean wayChosen = true;
-        int originalPosition = 0;
-        int newPositionY = 0;
-        int newPositionX = 0;
-
-        while (wayChosen == true) {
-            System.out.println("Which way do you want to go (north, south, east, west)?");
+    static void playerMovement(Hero other, int[][] map, int dungeonSize) {
+        boolean wayChosen = false;
+        while (wayChosen == false) {
+            System.out.print("Which way do you want to go (north, south, east, west)? ");
             String direction = sc.nextLine();
             if (direction.equalsIgnoreCase("north")) {
-                if (isMovePossible(map, playerLocation, direction) == true) {
+                if (isMovePossible(other, map, direction) == true) {
                     System.out.println("You moved north!");
-                    wayChosen = false;
+                    other.setRow(other.getRow() - 1);
+                    wayChosen = true;
                 }
             } else if (direction.equalsIgnoreCase("south")) {
-                if (isMovePossible(map, playerLocation, direction) == true) {
+                if (isMovePossible(other, map, direction) == true) {
                     System.out.println("You moved south!");
-                    wayChosen = false;
-                    originalPosition = newPositionY;
-                    map[originalPosition][originalPosition] = 0;
-                    newPositionY++;
-                    map[newPositionY][originalPosition] = 20;
+                    other.setRow(other.getRow() + 1);
+                    wayChosen = true;
                 }
             } else if (direction.equalsIgnoreCase("east")) {
-                if (isMovePossible(map, playerLocation, direction) == true) {
+                if (isMovePossible(other, map, direction) == true) {
                     System.out.println("You moved east!");
-                    wayChosen = false;
+                    other.setCol(other.getCol() + 1);
+                    wayChosen = true;
                 }
             } else if (direction.equalsIgnoreCase("west")) {
-                if (isMovePossible(map, playerLocation, direction) == true) {
+                if (isMovePossible(other, map, direction) == true) {
                     System.out.println("You moved west!");
-                    wayChosen = false;
+                    other.setCol(other.getCol() - 1);
+                    wayChosen = true;
                 }
             } else {
                 System.out.println("You can't move that way!");
@@ -134,43 +126,69 @@ public class Main {
         }
     }
 
-    static boolean isMovePossible(int[][] map, int playerLocation, String directionChosen) {
+    static boolean isMovePossible(Hero other, int[][] map, String directionChosen) {
         boolean movePossibility = true;
-        for (int i = 0; i < map.length; i++) {
-            if (map[0][i] == playerLocation && directionChosen.equalsIgnoreCase("north")) {
-                System.out.println("You cannot move north!");
-                movePossibility = false;
-            } else if (map[i][0] == playerLocation && directionChosen.equalsIgnoreCase("west")) {
-                System.out.println("You cannot move west!");
-                movePossibility = false;
-            } else if (map[map.length - 1][map.length - 1] == playerLocation
-                    && directionChosen.equalsIgnoreCase("south")) {
-                System.out.println("You cannot move south!");
-                movePossibility = false;
-            } else if (map[i][map.length - 1] == playerLocation && directionChosen.equalsIgnoreCase("east")) {
-                System.out.println("You cannot move east!");
-                movePossibility = false;
-            }
+        if (other.getRow() == 0 && directionChosen.equalsIgnoreCase("north")) {
+            System.out.println("You cannot move north!");
+            movePossibility = false;
+        } else if (other.getCol() == 0 && directionChosen.equalsIgnoreCase("west")) {
+            System.out.println("You cannot move west!");
+            movePossibility = false;
+        } else if (other.getRow() == map.length - 1 && directionChosen.equalsIgnoreCase("south")) {
+            System.out.println("You cannot move south!");
+            movePossibility = false;
+        } else if (other.getCol() == map.length - 1 && directionChosen.equalsIgnoreCase("east")) {
+            System.out.println("You cannot move east!");
+            movePossibility = false;
         }
         return movePossibility;
     }
 
     public static void playGame(Hero other, int[][] map) throws Exception {
-        int numberOfMonsters = 0;
-        int playerSpawn = 20; // Using 20 as a placeholder value for where the player is in the dungeon
-        map[0][0] = playerSpawn; // Spawning player
-        int[] playerLocation = { other.originalPosition, other.newPositionX, other.newPositionY };
-        while (other.isAlive() == true) {
-            printDungeon(map);
-            playerMovement(map, playerSpawn, map.length);
+        spawnMonsters(map);
+        printDungeon(map);
+        while (other.isAlive() == true && (other.getCol() < map.length - 1 || other.getRow() < map.length - 1)) {
+            int monsterSmellerCounter = 0;
+            // Checking for monsters at the beginning of each turn
+            for (Monster m : allMyMonsters) {
+                // This if statement is for smelling monsters
+                if ((m.getCol() == other.getCol() - 1 || m.getCol() == other.getCol() + 1)
+                        && m.getRow() == other.getRow()
+                        || (m.getRow() == other.getRow() - 1 || m.getRow() == other.getRow() + 1)
+                                && m.getCol() == other.getCol()) {
+                    other.monsterSmell(m);
+                    // This else if sees if the current monster being looked at is in the same room
+                    // and if it is fight it.
+                } else if (m.getCol() == other.getCol() && m.getRow() == other.getRow()) {
+                    combat(other, m);
+                    if (other.isAlive()) {
+                        // Tried removing my monster from the ArrayList but was getting errors if I
+                        // fought one of the monsters at the end of the ArrayList first. Because the for
+                        // loop would be in a place that didn't exist. Or at least this is what I think
+                        // was happening.
+
+                        // Made the monster dead() method instead that just throws them at the beginning
+                        // of the dungeon with zero health, and damage
+                        m.dead();
+                    }
+                }
+                if (other.monsterSmell(m) == true) {
+                    monsterSmellerCounter++;
+                }
+            }
+            System.out.println("You smell " + monsterSmellerCounter + " monster(s) nearby!");
+            playerMovement(other, map, map.length);
             other.moveRoomLoseHealth();
-            Monster monsterInRoom = new Monster("Monster", 25, 5);
-            // combat(other, monsterInRoom);
-            System.out.println(other.getName() + " has " + other.getHealth() + " health");
+
+            // Printing out location and health
+            System.out.println(other.getName() + " is at " + other.getRow() + " " + other.getCol() + " and has "
+                    + other.getHealth() + " health");
+
             if (other.isAlive() == true) {
-                numberOfMonsters--;
+                if (other.getCol() == map.length - 1 && other.getRow() == map.length - 1) {
+                    System.out.println("You escaped!");
+                }
             } else {
-                numberOfMonsters = 0;
                 System.out.println("You died.");
             }
         }
@@ -188,16 +206,13 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         int dungeonSize = userInputDungeonSize();
-        // I think i just use the map to put monsters in rooms.
-        // int[][] characterLocation = new int[dungeonSize][dungeonSize];
         int[][] map = new int[dungeonSize][dungeonSize];
         String heroName = userInputName();
 
-        // Hero object with name, hit points, max damage
-        Hero hero = new Hero(heroName, 100, 10);
-        // Monster monster = new Monster("Monster", 25, 5);
-        spawnMonsters(map);
-        // int amountOfMonsters = dungeonSize * dungeonSize / 6;
+        // Hero object with name, hit points, max damage, and spawn location with
+        // column/row number.
+        Hero hero = new Hero(heroName, 100, 10, 0, 0);
         playGame(hero, map);
+        sc.close();
     }
 }
