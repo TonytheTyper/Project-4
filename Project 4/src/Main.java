@@ -147,17 +147,21 @@ public class Main {
     public static void playGame(Hero other, int[][] map) throws Exception {
         spawnMonsters(map);
         printDungeon(map);
+        // Making a dead monster since I cant remove monsters from my ArrayList if I
+        // want to keep iterating this for each loop.
+        Monster deadMonster = new Monster("Dead Monster", 0, 0, 0, 0);
         while (other.isAlive() == true && (other.getCol() < map.length - 1 || other.getRow() < map.length - 1)) {
             int monsterSmellerCounter = 0;
             // Checking for monsters at the beginning of each turn
             for (Monster m : allMyMonsters) {
+                int count = 0;
                 // This if statement is for smelling monsters
                 if ((m.getCol() == other.getCol() - 1 || m.getCol() == other.getCol() + 1)
                         && m.getRow() == other.getRow()
                         || (m.getRow() == other.getRow() - 1 || m.getRow() == other.getRow() + 1)
                                 && m.getCol() == other.getCol()) {
                     other.monsterSmell(m);
-                    // This else if sees if the current monster being looked at is in the same room
+                    // This elseif sees if the current monster being looked at is in the same room
                     // and if it is fight it.
                 } else if (m.getCol() == other.getCol() && m.getRow() == other.getRow()) {
                     combat(other, m);
@@ -167,21 +171,23 @@ public class Main {
                         // loop would be in a place that didn't exist. Or at least this is what I think
                         // was happening.
 
-                        // Made the monster dead() method instead that just throws them at the beginning
+                        // Made the deadMonster instead that just throws them at the beginning
                         // of the dungeon with zero health, and damage
-                        m.dead();
+                        allMyMonsters.set(count, deadMonster);
+                        // m.dead();
                     }
                 }
                 if (other.monsterSmell(m) == true) {
                     monsterSmellerCounter++;
                 }
+                count++;
             }
             System.out.println("You smell " + monsterSmellerCounter + " monster(s) nearby!");
             playerMovement(other, map, map.length);
             other.moveRoomLoseHealth();
 
             // Printing out location and health
-            System.out.println(other.getName() + " is at " + other.getRow() + " " + other.getCol() + " and has "
+            System.out.println(other.getName() + " is at " + other.getRow() + ", " + other.getCol() + " and has "
                     + other.getHealth() + " health");
 
             if (other.isAlive() == true) {
