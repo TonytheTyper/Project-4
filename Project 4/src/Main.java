@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class Main {
     static ArrayList<Monster> allMyMonsters = new ArrayList<Monster>();
+    static ArrayList<Gold> allMyGold = new ArrayList<Gold>();
     private static Scanner sc = new Scanner(System.in);
 
     static int userInputDungeonSize() {
@@ -67,16 +68,41 @@ public class Main {
                 // Creating my monsters
                 Monster monster = new Monster("Monster " + i / 6, 25, 5, randomChoiceIntY, randomChoiceIntX);
                 allMyMonsters.add(monster);
-                // System.out.println(allMyMonsters); checking my hashmap
-                // If more than one monster is in the room
-                // Not a perfect catch
                 if (map[randomChoiceIntX][randomChoiceIntY] >= amountOfMonsters) {
                     multipleMonsters += 1;
                     amountOfMonsters = multipleMonsters;
                 }
                 map[randomChoiceIntX][randomChoiceIntY] = monster.monsterInRoom(monster, amountOfMonsters);
             }
-            // System.out.println("Monster " + monster + " spawned!");
+        }
+    }
+
+    public static void spawnGold(int[][] map) {
+        int multipleGold = 10;
+        for (int i = 6; i <= map[0].length * map[0].length; i += 6) {
+            int amountOfGold = 10;
+            // Random gold spawn
+            double randomChoiceX = Math.random() * map[0].length;
+            randomChoiceX = Math.floor(randomChoiceX);
+            int randomChoiceIntX = (int) randomChoiceX;
+
+            double randomChoiceY = Math.random() * map[0].length;
+            randomChoiceX = Math.floor(randomChoiceY);
+            int randomChoiceIntY = (int) randomChoiceY;
+
+            // If gold would spawn with hero go back an iteration
+            if (randomChoiceIntX == 0 && randomChoiceIntY == 0) {
+                i -= 6;
+            } else {
+                // Creating my gold pieces
+                Gold gold = new Gold("gold piece", randomChoiceIntY, randomChoiceIntX);
+                allMyGold.add(gold);
+                if (map[randomChoiceIntX][randomChoiceIntY] >= amountOfGold) {
+                    multipleGold += 10;
+                    amountOfGold = multipleGold;
+                }
+                map[randomChoiceIntX][randomChoiceIntY] = gold.goldInRoom(gold, amountOfGold);
+            }
         }
     }
 
@@ -146,15 +172,18 @@ public class Main {
 
     public static void playGame(Hero other, int[][] map) throws Exception {
         spawnMonsters(map);
-        printDungeon(map);
+        spawnGold(map);
+        // printDungeon(map); //Was using this to help visualize the map while coding.
         // Making a dead monster since I cant remove monsters from my ArrayList if I
         // want to keep iterating this for each loop.
         Monster deadMonster = new Monster("Dead Monster", 0, 0, 0, 0);
+        Gold pickedUpPieceOfGold = new Gold("Picked up gold piece", 0, 0);
+        int amountOfGoldPickedUp = 0;
         while (other.isAlive() == true && (other.getCol() < map.length - 1 || other.getRow() < map.length - 1)) {
             int monsterSmellerCounter = 0;
+            int count = 0;
             // Checking for monsters at the beginning of each turn
             for (Monster m : allMyMonsters) {
-                int count = 0;
                 // This if statement is for smelling monsters
                 if ((m.getCol() == other.getCol() - 1 || m.getCol() == other.getCol() + 1)
                         && m.getRow() == other.getRow()
@@ -172,15 +201,22 @@ public class Main {
                         // was happening.
 
                         // Made the deadMonster instead that just throws them at the beginning
-                        // of the dungeon with zero health, and damage
+                        // of the dungeon with zero health, and damage.
                         allMyMonsters.set(count, deadMonster);
-                        // m.dead();
                     }
                 }
                 if (other.monsterSmell(m) == true) {
                     monsterSmellerCounter++;
                 }
-                count++;
+            }
+            for (Gold g : allMyGold) {
+                if (g.getCol() == other.getCol() && g.getRow() == other.getRow()) {
+                    // I used the same logic for my picked up gold pieces as I did for dead monsters
+                    // since I couldn't figure out how to remove them.
+                    System.out.println(other.getName() + " picks up a " + g.getName() + "!");
+                    amountOfGoldPickedUp++;
+                    allMyGold.set(count, pickedUpPieceOfGold);
+                }
             }
             System.out.println("You smell " + monsterSmellerCounter + " monster(s) nearby!");
             playerMovement(other, map, map.length);
@@ -190,9 +226,10 @@ public class Main {
             System.out.println(other.getName() + " is at " + other.getRow() + ", " + other.getCol() + " and has "
                     + other.getHealth() + " health");
 
+            // Winning or losing conditions.
             if (other.isAlive() == true) {
                 if (other.getCol() == map.length - 1 && other.getRow() == map.length - 1) {
-                    System.out.println("You escaped!");
+                    System.out.println("You escaped and collected " + amountOfGoldPickedUp + " pieces of gold!");
                 }
             } else {
                 System.out.println("You died.");

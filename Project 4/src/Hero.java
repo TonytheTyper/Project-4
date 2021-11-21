@@ -9,6 +9,7 @@ public class Hero {
 
     private int rowPosition;
 
+    // My constructor method.
     public Hero(String name, int health, int maxDamage, int columnPosition, int rowPosition) {
         this.name = name;
         this.health = health;
@@ -17,6 +18,7 @@ public class Hero {
         this.rowPosition = rowPosition;
     }
 
+    // Getters and setters
     public void setCol(int newCol) {
         columnPosition = newCol;
     }
@@ -33,6 +35,15 @@ public class Hero {
         return rowPosition;
     }
 
+    public int getHealth() {
+        return health;
+    }
+
+    String getName() {
+        return name;
+    }
+
+    // Hero's monster smell method for nearby monsters.
     public boolean monsterSmell(Monster other) {
         boolean monsterNearby = false;
         if ((other.getCol() == columnPosition + 1 || other.getCol() == columnPosition - 1)
@@ -45,12 +56,9 @@ public class Hero {
         return monsterNearby;
     }
 
+    // Hit method for combat.
     public void hit(Monster other) {
-
-        // Making sure it uses other player's damage
         int damageMultiplier = (int) (Math.random() * other.maxDamage) + 1;
-        // System.out.println("Iron Man's damage " + damageMultiplier);
-        // was checking the damage
         health = health - damageMultiplier;
         System.out.println(name + " gets hit for " + damageMultiplier + "!");
     }
@@ -61,22 +69,15 @@ public class Hero {
         return nameWithHealth;
     }
 
-    public int getHealth() {
-        return health;
-    }
-
-    String getName() {
-        return name;
-    }
-
+    // Checking if hero's health is above zero to see if they're alive.
     boolean isAlive() {
-        // this.health = health;
         if (health <= 0) {
             return false;
         }
         return true;
     }
 
+    // Losing health as hero moves through rooms.
     public void moveRoomLoseHealth() {
         health -= 2;
     }

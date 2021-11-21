@@ -9,6 +9,7 @@ public class Monster {
 
     private int rowPosition;
 
+    // My constructor method
     public Monster(String name, int health, int maxDamage, int columnPosition, int rowPosition) {
         this.name = name;
         this.health = health;
@@ -17,6 +18,7 @@ public class Monster {
         this.rowPosition = rowPosition;
     }
 
+    // Getters and setters
     public void setCol(int newCol) {
         columnPosition = newCol;
     }
@@ -33,11 +35,9 @@ public class Monster {
         return rowPosition;
     }
 
+    // Hit method for combat.
     public void hit(Hero other) {
-        // Making sure it uses other player's damage
         int damageMultiplier = (int) (Math.random() * other.maxDamage) + 1;
-        // System.out.println("Iron Man's damage " + damageMultiplier);
-        // was checking the damage
         health = health - damageMultiplier;
         System.out.println(name + " gets hit for " + damageMultiplier + "!");
     }
@@ -48,13 +48,14 @@ public class Monster {
         return nameWithHealth;
     }
 
-    public void dead() {
-        columnPosition = 0;
-        rowPosition = 0;
-        health = 0;
-        maxDamage = 0;
-    }
+    // public void dead() {
+    // columnPosition = 0;
+    // rowPosition = 0;
+    // health = 0;
+    // maxDamage = 0;
+    // }
 
+    // Method I was using to visualize monsters on my map.
     int monsterInRoom(Monster monster, int other) {
 
         return other;
